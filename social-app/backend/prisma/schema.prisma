@@ -1,0 +1,87 @@
+// File: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  username    String    @unique
+  password    String
+  displayName String?
+  avatar      String?
+  bio         String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+
+  // Định nghĩa quan hệ Follow
+  followers Follow[] @relation("UserFollowers")
+  following Follow[] @relation("UserFollowing")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+
+  followerId  String
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id])
+
+  followingId String
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  content   String?
+  mediaUrls String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  String
+  author    User   @relation(fields: [authorId], references: [id])
+
+  postId    String
+  post      Post   @relation(fields: [postId], references: [id])
+  // Support threaded replies
+  parentId  String? 
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}

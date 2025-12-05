@@ -1,0 +1,34 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
+export default function ScrollParallaxBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      
+      const scrolled = window.pageYOffset;
+      const parallax = scrolled * 0.3;
+      
+      containerRef.current.style.transform = `translateY(${parallax}px)`;
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="fixed inset-0 -z-10 pointer-events-none"
+    >
+      {/* Gradient orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+    </div>
+  );
+}
+

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <!-- Hand-drawn effect filter using displacement map -->
+  <defs>
+    <filter id="hand-drawn-filter">
+      <feTurbulence 
+        type="fractalNoise" 
+        baseFrequency="0.03" 
+        numOctaves="2" 
+        result="noise"
+        seed="2"
+      />
+      <feDisplacementMap 
+        in="SourceGraphic" 
+        in2="noise" 
+        scale="2"
+        xChannelSelector="R"
+        yChannelSelector="G"
+      />
+    </filter>
+
+    <!-- Subtle hand-drawn effect (less intense) -->
+    <filter id="hand-drawn-subtle">
+      <feTurbulence 
+        type="fractalNoise" 
+        baseFrequency="0.04" 
+        numOctaves="1" 
+        result="noise"
+      />
+      <feDisplacementMap 
+        in="SourceGraphic" 
+        in2="noise" 
+        scale="1"
+      />
+    </filter>
+
+    <!-- Strong hand-drawn effect (more intense) -->
+    <filter id="hand-drawn-strong">
+      <feTurbulence 
+        type="fractalNoise" 
+        baseFrequency="0.02" 
+        numOctaves="3" 
+        result="noise"
+      />
+      <feDisplacementMap 
+        in="SourceGraphic" 
+        in2="noise" 
+        scale="3"
+      />
+    </filter>
+  </defs>
+</svg>

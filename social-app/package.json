@@ -1,0 +1,9 @@
+{
+  "name": "social-app-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/start-dev.ps1",
+    "dev:docker": "powershell -ExecutionPolicy Bypass -File ./scripts/start-dev.ps1 -withDocker"
+  }
+}

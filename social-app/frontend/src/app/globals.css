@@ -1,0 +1,131 @@
+/* stylelint-disable */
+/* Disable Tailwind at-rule warnings in editors that don't recognize Tailwind directives. */
+/* postcss-syntax: true */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f4efe6;
+  --foreground: #0b1020;
+}
+
+.dark {
+  --background: #0b0f1a;
+  --foreground: #e6e0dc;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  /* Use a readable system sans-serif for UI text; keep line-height comfortable */
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode styles */
+.dark body {
+  background-color: #0f1419;
+  color: #e7e9ea;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Ẩn scrollbar xấu xí, thay bằng style tối giản */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4efe6;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0b0f1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bcc0c4;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2f3336;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8a8d91;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #536471;
+}
+
+/* Smooth transitions */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-accent hover:bg-opacity-90 text-black rounded-lg font-semibold transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-surface border border-border hover:bg-opacity-80 text-primary rounded-lg transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-lg p-4;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 bg-surface border border-border rounded-lg text-primary placeholder-secondary focus:outline-none focus:border-accent transition-colors;
+  }
+
+  .glass {
+    @apply backdrop-blur-md bg-black/20 border border-white/10;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
