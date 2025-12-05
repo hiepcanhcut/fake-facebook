@@ -20,6 +20,21 @@ export class UsersController {
     return this.usersService.getUserProfile(id, currentUserId);
   }
 
+  @Get(':id/posts')
+  async getUserPosts(@Param('id') id: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    let skip = 0;
+    let take = 10;
+
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page) || 1);
+      const limitNum = Math.max(1, parseInt(limit) || 10);
+      skip = (pageNum - 1) * limitNum;
+      take = limitNum;
+    }
+
+    return this.usersService.getUserPosts(id, skip, take);
+  }
+
   @Post(':id/follow')
   @UseGuards(JwtAuthGuard)
   async followUser(@Param('id') id: string, @Request() req: any) {

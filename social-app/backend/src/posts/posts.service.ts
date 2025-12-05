@@ -60,7 +60,7 @@ export class PostsService {
     const actualPosts = posts.slice(0, take);
 
     return {
-      posts: actualPosts.map((post) => ({
+      posts: actualPosts.map((post: any) => ({
         id: post.id,
         content: post.content,
         authorId: post.authorId,
@@ -109,7 +109,7 @@ export class PostsService {
       authorName: post.author.displayName,
       createdAt: post.createdAt,
       likes: post.likes.length,
-      comments: post.comments.map((c) => ({
+      comments: post.comments.map((c: any) => ({
         id: c.id,
         content: c.content,
         authorName: c.author.displayName,
@@ -242,12 +242,12 @@ export class PostsService {
       },
     });
 
-    return comments.map((c) => ({
+    return comments.map((c: any) => ({
       id: c.id,
       content: c.content,
       author: c.author,
       createdAt: c.createdAt,
-      replies: c.replies.map((r) => ({ id: r.id, content: r.content, author: r.author, createdAt: r.createdAt })),
+      replies: c.replies.map((r: any) => ({ id: r.id, content: r.content, author: r.author, createdAt: r.createdAt })),
     }));
   }
 

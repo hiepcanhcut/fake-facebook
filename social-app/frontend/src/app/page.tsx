@@ -215,15 +215,15 @@ export default function Home() {
             <div>
               <h4 className="font-bold mb-4">Hỗ Trợ</h4>
               <ul className="space-y-2 text-white/60 dark:text-secondary-dark text-sm">
-                <li><a href="#" className="hover:text-white dark:hover:text-primary-dark transition">Trung tâm trợ giúp</a></li>
-                <li><a href="#" className="hover:text-white dark:hover:text-primary-dark transition">Liên hệ</a></li>
+                <li><Link href="/help" className="hover:text-white dark:hover:text-primary-dark transition">Trung tâm trợ giúp</Link></li>
+                <li><Link href="/contact" className="hover:text-white dark:hover:text-primary-dark transition">Liên hệ</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold mb-4">Pháp Lý</h4>
               <ul className="space-y-2 text-white/60 dark:text-secondary-dark text-sm">
-                <li><a href="#" className="hover:text-white dark:hover:text-primary-dark transition">Quyền riêng tư</a></li>
-                <li><a href="#" className="hover:text-white dark:hover:text-primary-dark transition">Điều khoản</a></li>
+                <li><Link href="/privacy" className="hover:text-white dark:hover:text-primary-dark transition">Quyền riêng tư</Link></li>
+                <li><Link href="/terms" className="hover:text-white dark:hover:text-primary-dark transition">Điều khoản</Link></li>
               </ul>
             </div>
           </div>

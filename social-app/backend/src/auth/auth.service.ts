@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client'; // Import User từ Prisma để chuẩn nhất
 
-// Xóa interface User tự tạo đi, dùng cái của Prisma ở trên
-// export interface User { ... } 
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  displayName: string | null;
+  password: string;
+}
 
 interface LoginRequest {
   email: string;
@@ -26,56 +30,24 @@ export interface AuthResponse {
 
 @Injectable()
 export class AuthService {
-  // Bạn đặt tên là 'jwt', nên bên dưới phải dùng 'this.jwt'
-  constructor(private jwt: JwtService, private prisma: PrismaService) {
-    this.seedDemoUser();
-  }
-
-  private async seedDemoUser() {
-    try {
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: 'demo@example.com' },
-      });
-      if (!existingUser) {
-        await this.prisma.user.create({
-          data: {
-            email: 'demo@example.com',
-            username: 'demo',
-            displayName: 'Demo User',
-            password: 'password', // Lưu ý: thực tế nên mã hóa password
-          },
-        });
-      }
-    } catch (err) {
-      // Bỏ qua lỗi nếu DB chưa sẵn sàng
-    }
-  }
+  constructor(private jwt: JwtService, private prisma: PrismaService) {}
 
   async validateUserCredentials(email: string, password: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
-
-    if (!user) {
+    if (!user || user.password !== password) {
       return null;
     }
-
-    // Simple password check (in production, use bcrypt)
-    if (user.password !== password) {
-      return null;
-    }
-
     return user;
   }
 
   async login(user: any) {
     const payload = { username: user.username, sub: user.id };
     return {
-      // SỬA 1: Đổi access_token thành accessToken cho khớp với Frontend
-      accessToken: this.jwt.sign(payload), 
-      // SỬA 2: Dùng 'this.jwt' thay vì 'this.jwtService'
+      accessToken: this.jwt.sign(payload),
       refreshToken: this.generateRefreshToken(user.id),
-      user: user, 
+      user: user,
     };
   }
 
@@ -88,7 +60,6 @@ export class AuthService {
         ],
       },
     });
-
     if (existingUser) {
       throw new Error('Email or username already exists');
     }
@@ -103,15 +74,19 @@ export class AuthService {
     });
 
     const payload = { sub: newUser.id, username: newUser.username };
-    
-    // Dùng this.jwt.sign cho gọn và đồng bộ
     const accessToken = this.jwt.sign(payload);
     const refreshToken = this.generateRefreshToken(newUser.id);
 
     return {
       accessToken,
       refreshToken,
-      user: newUser,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        displayName: newUser.displayName || '',
+        password: newUser.password,
+      },
     };
   }
 
@@ -119,12 +94,18 @@ export class AuthService {
     if (!payload || !payload.sub) {
       return null;
     }
-  
+
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
-  
-    return user;
+    if (!user) return null;
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      displayName: user.displayName || '',
+      password: user.password,
+    };
   }
 
   private generateRefreshToken(userId: string): string {

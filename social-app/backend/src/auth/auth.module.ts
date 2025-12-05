@@ -4,7 +4,6 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-// 👇 1. Thêm dòng import này
 import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
@@ -16,9 +15,9 @@ import { PrismaService } from '../prisma/prisma.service';
     }),
   ],
   providers: [
-    AuthService, 
-    JwtStrategy, 
-    PrismaService // 👈 2. Thêm PrismaService vào đây
+    AuthService,
+    JwtStrategy,
+    PrismaService
   ],
   controllers: [AuthController],
   exports: [AuthService],

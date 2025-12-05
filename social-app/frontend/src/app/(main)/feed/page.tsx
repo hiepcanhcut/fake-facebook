@@ -67,13 +67,27 @@ export default function Feed() {
           setUploadProgress(0);
           const form = new FormData();
           selectedFiles.forEach((f) => form.append('file', f));
-          const res = await api.uploadForm('/uploads', form, (percent) => {
-            setUploadProgress(percent);
+
+          // Use direct axios call with explicit auth header for FormData
+          const axios = (await import('axios')).default;
+          const token = api.getAccessToken();
+          const res = await axios.post('http://localhost:3001/api/uploads', form, {
+            headers: {
+              'Authorization': token ? `Bearer ${token}` : '',
+            },
+            onUploadProgress: (progressEvent: any) => {
+              if (progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setUploadProgress(percent);
+              }
+            },
           });
+
           const data = res.data as any;
           console.log('Upload response:', data);
           if (data?.files && Array.isArray(data.files)) {
             mediaUrls = data.files.map((f: any) => f.url).filter(Boolean);
+            console.log('Extracted mediaUrls:', mediaUrls);
           }
         } catch (err: any) {
           console.error('File upload failed:', err);
@@ -102,9 +116,11 @@ export default function Feed() {
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    console.log('Files selected:', files);
     if (!files) return;
 
     const arr = Array.from(files);
+    console.log('Files array:', arr);
     setSelectedFiles(arr);
 
     // Create previews
@@ -332,10 +348,10 @@ export default function Feed() {
                 </div>
                 <p className="text-primary mb-4 whitespace-pre-wrap pl-[52px]">{post.content}</p>
                 {post.mediaUrls && post.mediaUrls.length > 0 && (
-                  <div className="pl-[52px] mb-4 grid grid-cols-2 gap-3">
+                  <div className="pl-[52px] mb-4 grid grid-cols-1 gap-3">
                     {post.mediaUrls.map((m) => (
-                      <div key={m} className="w-full h-40 bg-gray-100 rounded overflow-hidden">
-                        {m.endsWith('.mp4') || m.includes('video') ? (
+                      <div key={m} className="w-full h-64 bg-gray-100 rounded overflow-hidden">
+                        {/\.(mp4|avi|mov|mkv|webm|ogv)$/i.test(m) ? (
                           <video src={m} className="w-full h-full object-cover" controls />
                         ) : (
                           <img src={m} alt="media" className="w-full h-full object-cover" />

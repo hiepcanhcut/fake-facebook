@@ -68,10 +68,9 @@ export default function Sidebar() {
             
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-primary-dark hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition text-left"
+              className="block w-full px-4 py-3 rounded-lg transition font-medium text-left text-primary dark:text-primary-dark hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             >
-              <span className="text-xl">🚪</span>
-              <span className="font-medium">Đăng xuất</span>
+              Đăng xuất
             </button>
           </div>
         </div>

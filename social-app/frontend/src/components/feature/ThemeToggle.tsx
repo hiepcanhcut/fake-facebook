@@ -30,15 +30,9 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       // Style cho giống các item khác trong Sidebar
-      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-primary-dark hover:bg-surface dark:hover:bg-surface-dark transition text-left"
+      className="w-full px-4 py-3 rounded-lg text-primary dark:text-primary-dark hover:bg-surface dark:hover:bg-surface-dark transition font-medium text-left"
     >
-      {/* 3. Dùng thẻ SPAN, tuyệt đối không dùng thẻ button ở đây */}
-      <span className="text-xl">
-        {theme === 'dark' ? '🌙' : '☀️'}
-      </span>
-      <span className="font-medium">
-        {theme === 'dark' ? 'Chế độ tối' : 'Chế độ sáng'}
-      </span>
+      {theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
     </button>
   );
 }

@@ -1,7 +1,6 @@
 import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { User } from '@prisma/client';
 
 @Controller('api/auth')
 export class AuthController {
@@ -26,7 +25,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@Request() req: any) {
+  async getProfile(@Request() req: any): Promise<any> {
     const user = await this.authService.validateUser(req.user);
     return user;
   }
