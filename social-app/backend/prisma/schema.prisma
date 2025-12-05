@@ -8,20 +8,24 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  username    String    @unique
+  id          String       @id @default(uuid())
+  email       String       @unique
+  username    String       @unique
   password    String
   displayName String?
   avatar      String?
   bio         String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   comments    Comment[]
-  followers   Follow[]  @relation("UserFollowers")
-  following   Follow[]  @relation("UserFollowing")
+  followers   Follow[]     @relation("UserFollowers")
+  following   Follow[]     @relation("UserFollowing")
   likes       Like[]
   posts       Post[]
+  sentNotifications       Notification[] @relation("NotificationSender")
+  receivedNotifications   Notification[] @relation("NotificationReceiver")
+  sentMessages             Message[]
+  conversations            ConversationParticipant[]
 }
 
 model Follow {
@@ -36,15 +40,15 @@ model Follow {
 }
 
 model Post {
-  id        String    @id @default(uuid())
+  id        String      @id @default(uuid())
   content   String?
   mediaUrls String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   authorId  String
   comments  Comment[]
   likes     Like[]
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User        @relation(fields: [authorId], references: [id])
 }
 
 model Comment {
@@ -70,4 +74,48 @@ model Like {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, postId])
+}
+
+model Notification {
+  id        String      @id @default(uuid())
+  type      String      // 'like', 'comment', 'follow'
+  content   String
+  isRead    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  senderId  String
+  receiverId String
+  postId    String?     // For likes and comments
+  sender    User        @relation("NotificationSender", fields: [senderId], references: [id])
+  receiver  User        @relation("NotificationReceiver", fields: [receiverId], references: [id])
+  post      Post?       @relation(fields: [postId], references: [id])
+}
+
+model Conversation {
+  id          String                     @id @default(uuid())
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  participants ConversationParticipant[]
+  messages    Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  joinedAt       DateTime     @default(now())
+  userId         String
+  conversationId String
+  user           User         @relation(fields: [userId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@unique([userId, conversationId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  senderId       String
+  conversationId String
+  sender         User         @relation(fields: [senderId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
