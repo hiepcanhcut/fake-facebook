@@ -5,15 +5,26 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SimpleBackground from '@/components/feature/SimpleBackground';
 import ThemeToggle from '@/components/feature/ThemeToggle';
+import api from '@/lib/api';
+
+interface UserProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  bio?: string;
+  introduction?: string;
+}
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [featuredUsers, setFeaturedUsers] = useState<UserProfile[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('accessToken');
-    
+
     if (token && storedUser) {
       // Redirect to feed if already logged in
       router.push('/feed');
@@ -21,6 +32,24 @@ export default function Home() {
     }
     setIsLoading(false);
   }, [router]);
+
+  useEffect(() => {
+    const fetchFeaturedUsers = async () => {
+      try {
+        // Try to get the demo user profile
+        const response = await api.get('/users/demo');
+        if (response.data && response.data.id) {
+          setFeaturedUsers([response.data as UserProfile]);
+        }
+      } catch (error) {
+        console.log('Could not fetch featured users');
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
+    fetchFeaturedUsers();
+  }, []);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">Đang tải...</div>;
@@ -31,20 +60,20 @@ export default function Home() {
       <SimpleBackground />
       {/* Navigation */}
       <nav className="border-b border-border dark:border-border-dark bg-white dark:bg-surface-dark sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-accent hover:text-accent-dark transition cursor-pointer">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
+          <Link href="/" className="text-lg font-bold text-accent hover:text-accent-dark transition cursor-pointer">
             Astra
           </Link>
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-2 items-center">
             <ThemeToggle />
-            <Link href="/login" className="px-6 py-2 text-primary dark:text-primary-dark font-medium hover:bg-gray-100 dark:hover:bg-surface-dark rounded-lg transition">
+            <Link href="/login" className="px-3 py-1.5 text-sm text-primary dark:text-primary-dark font-medium hover:bg-gray-100 dark:hover:bg-surface-dark rounded-md transition">
               Đăng nhập
             </Link>
             <Link
               href="/register"
-              className="px-6 py-2 bg-accent hover:bg-accent-dark text-white font-semibold rounded-lg transition"
+              className="px-3 py-1.5 text-sm bg-accent hover:bg-accent-dark text-white font-semibold rounded-md transition"
             >
-              Tham gia ngay
+              Đăng ký
             </Link>
           </div>
         </div>
@@ -143,6 +172,61 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Community Introductions */}
+      {!usersLoading && featuredUsers.length > 0 && (
+        <section className="bg-gray-900 dark:bg-gray-800 py-16 sm:py-24 relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">Cộng Đồng Astra</h2>
+              <p className="text-xl text-gray-300">Khám phá những con người tuyệt vời trong cộng đồng của chúng tôi</p>
+            </div>
+
+            <div className="grid md:grid-cols-1 gap-8 max-w-4xl mx-auto">
+              {featuredUsers.map((user) => (
+                <div key={user.id} className="bg-gray-800 dark:bg-gray-700 rounded-xl p-8 border border-gray-700 shadow-2xl">
+                  <div className="flex items-start gap-6">
+                    <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h3 className="text-2xl font-bold text-white">{user.displayName}</h3>
+                        <span className="text-gray-400">@{user.username}</span>
+                      </div>
+
+                      {user.bio && (
+                        <p className="text-gray-300 mb-6 text-lg italic">"{user.bio}"</p>
+                      )}
+
+                      {user.introduction && (
+                        <div className="bg-gray-900 dark:bg-gray-600 rounded-lg p-6 border-l-4 border-accent">
+                          <p className="text-gray-200 whitespace-pre-wrap leading-relaxed">{user.introduction}</p>
+                        </div>
+                      )}
+
+                      <div className="mt-6 flex gap-4">
+                        <Link
+                          href={`/profile/${user.id}`}
+                          className="px-6 py-2 bg-accent hover:bg-accent-dark text-white font-semibold rounded-lg transition"
+                        >
+                          Xem hồ sơ
+                        </Link>
+                        <Link
+                          href="/register"
+                          className="px-6 py-2 border border-gray-600 text-gray-300 hover:bg-gray-700 rounded-lg font-semibold transition"
+                        >
+                          Tham gia cộng đồng
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Why Join */}
       <section className="bg-white dark:bg-surface-dark py-16 sm:py-24 relative">

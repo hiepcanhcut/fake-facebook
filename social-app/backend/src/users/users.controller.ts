@@ -49,7 +49,7 @@ export class UsersController {
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
-  async updateProfile(@Request() req: any, @Body() body: { displayName?: string; bio?: string }) {
+  async updateProfile(@Request() req: any, @Body() body: { displayName?: string; bio?: string; introduction?: string }) {
     return this.usersService.updateUserProfile(req.user.sub, body);
   }
 }

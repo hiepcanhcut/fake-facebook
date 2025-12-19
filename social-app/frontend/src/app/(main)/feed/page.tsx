@@ -216,6 +216,34 @@ export default function Feed() {
   return (
     <div className="flex-1">
       <div className="max-w-2xl mx-auto p-4">
+        {/* Featured Introductions Section */}
+        <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-6 border border-border mb-6 shadow-sm">
+          <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
+            <span className="text-2xl">🌟</span>
+            Giới thiệu nổi bật
+          </h2>
+          <div className="space-y-4">
+            {/* Sample featured introduction - you can make this dynamic later */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {user.displayName?.[0] || user.username?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-primary">{user.displayName || user.username}</h3>
+                  <p className="text-secondary text-sm mb-2">@{user.username}</p>
+                  {user.bio && (
+                    <p className="text-primary text-sm mb-2 italic">"{user.bio}"</p>
+                  )}
+                  <Link href={`/profile/${user.id}`} className="inline-flex items-center gap-1 text-accent hover:text-accent-dark text-sm font-medium transition">
+                    Xem giới thiệu đầy đủ →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Create Post Form */}
         <div className="bg-white rounded-xl p-4 border border-border mb-4 shadow-sm">
           <div className="flex gap-3 mb-4">

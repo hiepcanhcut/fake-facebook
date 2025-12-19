@@ -6,7 +6,18 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { usePostStore } from '@/store/postStore';
 
-// ... (Giữ nguyên interface UserProfile)
+// Define UserProfile interface
+interface UserProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  bio?: string;
+  introduction?: string;
+  postCount: number;
+  followers: number;
+  following: number;
+  isFollowing: boolean;
+}
 
 export default function UserProfile() {
   const router = useRouter();
@@ -22,6 +33,10 @@ export default function UserProfile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState(''); // Thêm state lỗi để debug
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBio, setEditBio] = useState('');
+  const [editIntroduction, setEditIntroduction] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -45,9 +60,10 @@ export default function UserProfile() {
         // 1. Tải thông tin User
         const response = await api.get(`/users/${userId}`);
         console.log("✅ Đã lấy xong profile:", response.data);
-        
-        setProfile(response.data);
-        setIsFollowing(response.data.isFollowing || false);
+
+        const profileData = response.data as UserProfile;
+        setProfile(profileData);
+        setIsFollowing(profileData.isFollowing || false);
 
         // 2. Tải bài viết (Gọi song song hoặc tuần tự đều được)
         // Lưu ý: Nếu fetchPostsForUser lỗi, ta vẫn muốn hiển thị profile, nên có thể tách try/catch hoặc để chung tùy logic
@@ -67,7 +83,22 @@ export default function UserProfile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, router]); // Bỏ fetchPostsForUser ra để tránh loop nếu function này không ổn định
 
-  // ... (Phần logic handleFollowToggle giữ nguyên)
+  const handleFollowToggle = async () => {
+    if (followLoading || !profile) return;
+
+    setFollowLoading(true);
+    try {
+      const response = await api.post(`/users/${userId}/${isFollowing ? 'unfollow' : 'follow'}`);
+      const data = response.data as { following: boolean };
+      setIsFollowing(data.following);
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, isFollowing: data.following } : null);
+    } catch (err: any) {
+      console.error('Lỗi khi theo dõi:', err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-screen bg-white flex items-center justify-center text-secondary">Đang tải... (Vui lòng mở Console F12 nếu quá lâu)</div>;
@@ -105,7 +136,20 @@ export default function UserProfile() {
               <h1 className="text-3xl font-bold text-primary">{profile.displayName}</h1>
               <p className="text-secondary">@{profile.username}</p>
             </div>
-            {!isOwnProfile && (
+            {isOwnProfile ? (
+              <button
+                onClick={() => {
+                  setIsEditing(!isEditing);
+                  if (!isEditing) {
+                    setEditBio(profile.bio || '');
+                    setEditIntroduction(profile.introduction || '');
+                  }
+                }}
+                className="px-6 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-accent-dark transition"
+              >
+                {isEditing ? 'Hủy' : 'Chỉnh sửa'}
+              </button>
+            ) : (
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
@@ -120,8 +164,76 @@ export default function UserProfile() {
             )}
           </div>
 
-          {profile.bio && (
-            <p className="text-primary mb-6">{profile.bio}</p>
+          {isEditing ? (
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-primary mb-2">Bio</label>
+                <textarea
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  rows={3}
+                  placeholder="Viết gì đó về bạn..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-primary mb-2">Giới thiệu</label>
+                <textarea
+                  value={editIntroduction}
+                  onChange={(e) => setEditIntroduction(e.target.value)}
+                  className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  rows={6}
+                  placeholder="Giới thiệu chi tiết về bản thân..."
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      await api.patch('/users/me', {
+                        bio: editBio,
+                        introduction: editIntroduction,
+                      });
+                      // Update local profile
+                      setProfile(prev => prev ? {
+                        ...prev,
+                        bio: editBio,
+                        introduction: editIntroduction
+                      } : null);
+                      setIsEditing(false);
+                    } catch (err: any) {
+                      console.error('Lỗi khi lưu:', err);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  className="px-6 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-accent-dark transition disabled:opacity-50"
+                >
+                  {saving ? 'Đang lưu...' : 'Lưu'}
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {profile.bio && (
+                <p className="text-primary mb-6">{profile.bio}</p>
+              )}
+
+              {profile.introduction && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-primary mb-2">Giới thiệu</h3>
+                  <p className="text-primary whitespace-pre-wrap">{profile.introduction}</p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="flex gap-8">
